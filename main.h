@@ -11,6 +11,35 @@
 #FUSES NOIESO
 #FUSES NOFCMEN
 #FUSES NOPROTECT
+#FUSES CANC                     //Enable to move CAN pins to C6(TX) and C7(RX)
 
 #use delay(clock = 20000000)
 
+// SWITCHES
+#define HORN_SWITCH   PIN_B3
+#define MPPT_SWITCH   PIN_B4
+#define MOTOR_SWITCH  PIN_B5
+
+// OUTPUTS
+#define STATUS_LED    PIN_A5
+#define AUX_PIN       PIN_C0
+#define PRECHARGE_PIN PIN_C1
+#define MOTOR_PIN     PIN_C2
+#define MPPT_PIN      PIN_C3
+
+// ANALOG PINS
+#define AUX1_PIN      PIN_A0
+#define AUX2_PIN      PIN_A1
+#define AUX3_PIN      PIN_A2
+#define AUX4_PIN      PIN_A3
+#define DCDC_TEMP_PIN PIN_B0
+
+// State machine states
+typedef enum
+{
+    IDLE,
+    CHECK_SWITCHES,
+    DATA_RECEIVED,
+    DATA_SENDING,
+    N_STATES
+} pms_state_t;
