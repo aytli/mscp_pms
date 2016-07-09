@@ -213,6 +213,7 @@ void main()
     
     can_init();
     
+    // Start in idle state
     g_state = IDLE;
     
     while(true)
