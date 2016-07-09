@@ -68,6 +68,17 @@ void update_pms_data(void)
     g_pms_data_page[7] = 8;
 }
 
+void honk(void)
+{
+    int i;
+    output_high(HORN_PIN);
+    for (i = 0 ; i < HORN_DURATION_MS ; i++)
+    {
+        delay_ms(1);
+    }
+    output_low(HORN_PIN);
+}
+
 // INT_TIMER2 programmed to trigger every 1ms with a 20MHz clock
 // This interrupt will send out telemetry data for the aux pack and the dcdc converter
 // This interrupt will also toggle the status LED
@@ -180,12 +191,7 @@ void data_received_state(void)
             break;
         case COMMAND_PMS_ENABLE_HORN_ID:
             // Received a command to honk the horn
-            output_high(HORN_PIN);
-            for (i = 0 ; i < HORN_DURATION_MS ; i++)
-            {
-                delay_ms(1);
-            }
-            output_low(HORN_PIN);
+            honk();
             break;
         case CAN_BPS_TEMPERATURE1_ID:
         case CAN_BPS_TEMPERATURE2_ID:
