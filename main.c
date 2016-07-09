@@ -7,8 +7,9 @@
 #define HORN_DURATION_MS       500
 #define DEBOUNCE_PERIOD_MS     100
 
-#define BPS_TEMP_WARNING  60 // 60°C charge limit
-#define BPS_TEMP_CRITICAL 70 // 70°C discharge limit
+// BMS temperature limits
+#define BPS_TEMP_WARNING       60 // 60°C charge limit
+#define BPS_TEMP_CRITICAL      70 // 70°C discharge limit
 
 // CAN bus defines
 #define TX_PRI 3
