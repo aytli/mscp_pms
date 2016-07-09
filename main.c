@@ -31,6 +31,13 @@
     gb_motor_connected = false; \
     output_low(MOTOR_PIN);
 
+// Debounces a hardware pin
+#define DEBOUNCE                               \
+    for (i = 0 ; i < DEBOUNCE_PERIOD_MS ; i++) \
+    {                                          \
+        delay_ms(1);                           \
+    }
+
 static int1        gb_send;
 static int32       g_can0_id;
 static int8        g_can0_data[8];
@@ -183,10 +190,7 @@ void check_switches_state(void)
     // Check the array switch
     if ((input_state(MPPT_SWITCH) == 1) && (gb_array_connected == false) && (gb_battery_temperature_safe == true))
     {
-        for (i = 0 ; i < DEBOUNCE_PERIOD_MS ; i++)
-        {
-            delay_ms(1);
-        }
+        DEBOUNCE;
         if (input_state(MPPT_SWITCH) == 1)
         {
             // If the switch was turned on and the battery temperature is safe, turn on the array
@@ -195,10 +199,7 @@ void check_switches_state(void)
     }
     else if ((input_state(MPPT_SWITCH) == 0) && (gb_array_connected == true))
     {
-        for (i = 0 ; i < DEBOUNCE_PERIOD_MS ; i++)
-        {
-            delay_ms(1);
-        }
+        DEBOUNCE;
         if (input_state(MPPT_SWITCH) == 0)
         {
             // If the switch was turned off, turn off the array
@@ -209,10 +210,7 @@ void check_switches_state(void)
     // Check the motor switch
     if ((input_state(MOTOR_SWITCH) == 1) && (gb_motor_connected == false))
     {
-        for (i = 0 ; i < DEBOUNCE_PERIOD_MS ; i++)
-        {
-            delay_ms(1);
-        }
+        DEBOUNCE;
         if (input_state(MOTOR_SWITCH) == 1)
         {
             // If the switch was turned on, precharge the motor and turn it on
@@ -228,10 +226,7 @@ void check_switches_state(void)
     }
     else if ((input_state(MOTOR_SWITCH) == 0) && (gb_motor_connected == true))
     {
-        for (i = 0 ; i < DEBOUNCE_PERIOD_MS ; i++)
-        {
-            delay_ms(1);
-        }
+        DEBOUNCE;
         if (input_state(MOTOR_SWITCH) == 0)
         {
             // If the switch was turned off, turn off the motor
