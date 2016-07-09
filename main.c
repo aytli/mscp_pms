@@ -36,6 +36,7 @@ static int8        g_rx_data[8];
 static pms_state_t g_state;
 
 static int1        gb_array_connected;
+static int1        gb_battery_temperature_safe;
 
 static int8        g_pms_data_page[CAN_PMS_DATA_LEN];
 
@@ -148,9 +149,19 @@ void idle_state(void)
     }
 }
 
-
 void check_switches_state(void)
 {
+    if ((input_state(MPPT_SWITCH) == 1) && (gb_array_connected == false) && (gb_battery_temperature_safe == true))
+    {
+        // If the switch was turned on and the battery temperature is safe, turn on the array
+        ARRAY_ON;
+    }
+    else if ((input_state(MPPT_SWITCH) == 0) && (gb_array_connected == true))
+    {
+        // If the switch was turned off, turn off the array
+        ARRAY_OFF;
+    }
+    
     // Return to idle state
     g_state = IDLE;
 }
@@ -183,12 +194,14 @@ void data_received_state(void)
             {
                 // One of the battery temperatures is above the warning threshold
                 // Turn off the array
+                gb_battery_temperature_safe = false;
                 ARRAY_OFF;
             }
-            else if (gb_array_connected == false)
+            else if ((gb_array_connected == false) && (input_state(MPPT_SWITCH) == 1))
             {
                 // The battery temperatures are all below the warning threshold
-                // Turn on the array if it is off
+                // Turn on the array if it is off and the switch is pressed
+                gb_battery_temperature_safe = true;
                 ARRAY_ON;
             }
             break;
