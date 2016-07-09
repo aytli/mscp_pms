@@ -49,6 +49,13 @@ static int1        gb_array_connected;
 static int1        gb_battery_temperature_safe;
 static int8        g_pms_data_page[CAN_PMS_DATA_LEN];
 
+void pms_init(void)
+{
+    gb_motor_connected          = false;
+    gb_array_connected          = false;
+    gb_battery_temperature_safe = true;
+}
+
 // Accepts a packet of BPS temperature data and the length of the packet
 // Checks if each point of data is below the temperature warning threshold
 int1 check_bps_temperature(int * data, int length)
@@ -303,6 +310,7 @@ void main()
     enable_interrupts(INT_TIMER2);
     enable_interrupts(GLOBAL);
     
+    pms_init();
     can_init();
     
     // Start in idle state
