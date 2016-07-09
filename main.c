@@ -2,8 +2,9 @@
 #include "can_telem.h"
 #include "can18F4580_mscp.c"
 
-#define SENDING_PERIOD_MS 200
-#define HORN_DURATION_MS  500
+#define SENDING_PERIOD_MS      200
+#define PRECHARGE_DURATION_MS 1000
+#define HORN_DURATION_MS       500
 
 #define BPS_TEMP_WARNING  60 // 60°C charge limit
 #define BPS_TEMP_CRITICAL 70 // 70°C discharge limit
@@ -34,10 +35,9 @@ static int32       g_rx_id;
 static int8        g_rx_len;
 static int8        g_rx_data[8];
 static pms_state_t g_state;
-
+static int1        gb_motor_connected;
 static int1        gb_array_connected;
 static int1        gb_battery_temperature_safe;
-
 static int8        g_pms_data_page[CAN_PMS_DATA_LEN];
 
 // Accepts a packet of BPS temperature data and the length of the packet
@@ -162,6 +162,9 @@ void idle_state(void)
 
 void check_switches_state(void)
 {
+    int i;
+    
+    // Check the array switch
     if ((input_state(MPPT_SWITCH) == 1) && (gb_array_connected == false) && (gb_battery_temperature_safe == true))
     {
         // If the switch was turned on and the battery temperature is safe, turn on the array
@@ -171,6 +174,27 @@ void check_switches_state(void)
     {
         // If the switch was turned off, turn off the array
         ARRAY_OFF;
+    }
+    
+    // Check the motor switch
+    if ((input_state(MOTOR_SWITCH) == 1) && (gb_motor_connected == false))
+    {
+        // If the switch was turned on, precharge the motor and turn it on
+        output_high(PRECHARGE_PIN);
+        for (i = 0 ; i < PRECHARGE_DURATION_MS ; i++)
+        {
+            delay_ms(1);
+        }
+        output_high(MOTOR_PIN);
+        delay_ms(10);
+        output_low(PRECHARGE_PIN);
+        gb_motor_connected = true;
+    }
+    else if ((input_state(MOTOR_SWITCH) == 0) && (gb_motor_connected == true))
+    {
+        // If the switch was turned off, turn off the motor
+        output_low(MOTOR_PIN);
+        gb_motor_connected = false;
     }
     
     // Return to idle state
