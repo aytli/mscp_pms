@@ -22,6 +22,14 @@
     gb_array_connected = false; \
     output_low(MPPT_PIN);
 
+#define MOTOR_ON                \
+    gb_motor_connected = true;  \
+    output_high(MOTOR_PIN);
+
+#define MOTOR_OFF               \
+    gb_motor_connected = false; \
+    output_low(MOTOR_PIN);
+
 static int1        gb_send;
 static int32       g_can0_id;
 static int8        g_can0_data[8];
@@ -58,14 +66,14 @@ int1 check_bps_temperature(int * data, int length)
 
 void update_pms_data(void)
 {
-    g_pms_data_page[0] = 1;
-    g_pms_data_page[1] = 2;
-    g_pms_data_page[2] = 3;
-    g_pms_data_page[3] = 4;
-    g_pms_data_page[4] = 5;
-    g_pms_data_page[5] = 6;
-    g_pms_data_page[6] = 7;
-    g_pms_data_page[7] = 8;
+    g_pms_data_page[0] = 1; // Aux cell 1 voltage
+    g_pms_data_page[1] = 2; // Aux cell 2 voltage
+    g_pms_data_page[2] = 3; // Aux cell 3 voltage
+    g_pms_data_page[3] = 4; // Aux cell 4 voltage
+    g_pms_data_page[4] = 5; // DC/Dc converter temperature
+    g_pms_data_page[5] = gb_array_connected; // Motor state
+    g_pms_data_page[6] = gb_motor_connected; // Array state
+    g_pms_data_page[7] = 8; // Unused?
 }
 
 void honk(void)
@@ -185,16 +193,14 @@ void check_switches_state(void)
         {
             delay_ms(1);
         }
-        output_high(MOTOR_PIN);
+        MOTOR_ON;
         delay_ms(10);
         output_low(PRECHARGE_PIN);
-        gb_motor_connected = true;
     }
     else if ((input_state(MOTOR_SWITCH) == 0) && (gb_motor_connected == true))
     {
         // If the switch was turned off, turn off the motor
-        output_low(MOTOR_PIN);
-        gb_motor_connected = false;
+        MOTOR_OFF;
     }
     
     // Return to idle state
