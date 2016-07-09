@@ -2,7 +2,7 @@
 #include "can_telem.h"
 #include "can18F4580_mscp.c"
 
-#define HEARTBEAT_PERIOD_MS 200
+#define SENDING_PERIOD_MS 200
 
 #define BPS_TEMP_WARNING  60 // 60°C charge limit
 #define BPS_TEMP_CRITICAL 70 // 70°C discharge limit
@@ -36,6 +36,8 @@ static pms_state_t g_state;
 
 static int1        gb_array_connected;
 
+static int8        g_pms_data_page[CAN_PMS_DATA_LEN];
+
 // Accepts a packet of BPS temperature data and the length of the packet
 // Checks if each point of data is below the temperature warning threshold
 int1 check_bps_temperature(int * data, int length)
@@ -53,15 +55,17 @@ int1 check_bps_temperature(int * data, int length)
 }
 
 // INT_TIMER2 programmed to trigger every 1ms with a 20MHz clock
-// This interrupt will toggle the heartbeat LED
+// This interrupt will send out telemetry data for the aux pack and the dcdc converter
+// This interrupt will also toggle the status LED
 #int_timer2
 void isr_timer2(void)
 {
     static int8 ms = 0;
-    if (ms >= HEARTBEAT_PERIOD_MS)
+    if (ms >= SENDING_PERIOD_MS)
     {
-        ms = 0;         // Reset timer
-        output_toggle(STATUS_LED);
+        ms = 0;                    // Reset timer
+        output_toggle(STATUS_LED); // Toggle the status LED
+        gb_send = true;
     }
     else
     {
@@ -171,6 +175,10 @@ void data_received_state(void)
 
 void data_sending_state(void)
 {
+    // Sends a packet of telemetry data
+    gb_send = false;
+    can_putd(CAN_PMS_DATA_ID,g_pms_data_page,CAN_PMS_DATA_LEN,TX_PRI,TX_EXT,TX_RTR);
+    g_state = IDLE;
 }
 
 void main()
