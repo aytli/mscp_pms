@@ -94,7 +94,7 @@ void update_pms_data(void)
 
 void honk(void)
 {
-    int i;
+    int16 i;
     output_high(HORN_PIN);
     for (i = 0 ; i < HORN_DURATION_MS ; i++)
     {
@@ -241,8 +241,6 @@ void check_switches_state(void)
 
 void data_received_state(void)
 {
-    int i;
-    
     switch(g_rx_id)
     {
         case COMMAND_PMS_DISCONNECT_ARRAY_ID:
