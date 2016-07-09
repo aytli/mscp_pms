@@ -16,12 +16,12 @@
 #use delay(clock = 20000000)
 
 // SWITCHES
-#define HORN_SWITCH   PIN_B3
 #define MPPT_SWITCH   PIN_B4
 #define MOTOR_SWITCH  PIN_B5
 
 // OUTPUTS
 #define STATUS_LED    PIN_A5
+#define HORN_PIN      PIN_B3
 #define AUX_PIN       PIN_C0
 #define PRECHARGE_PIN PIN_C1
 #define MOTOR_PIN     PIN_C2

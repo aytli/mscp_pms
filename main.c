@@ -3,6 +3,7 @@
 #include "can18F4580_mscp.c"
 
 #define SENDING_PERIOD_MS 200
+#define HORN_DURATION_MS  500
 
 #define BPS_TEMP_WARNING  60 // 60°C charge limit
 #define BPS_TEMP_CRITICAL 70 // 70°C discharge limit
@@ -147,13 +148,17 @@ void idle_state(void)
     }
 }
 
+
 void check_switches_state(void)
 {
+    // Return to idle state
     g_state = IDLE;
 }
 
 void data_received_state(void)
 {
+    int i;
+    
     switch(g_rx_id)
     {
         case COMMAND_PMS_DISCONNECT_ARRAY_ID:
@@ -161,6 +166,15 @@ void data_received_state(void)
             // Turn off the array and send a response
             ARRAY_OFF;
             can_putd(COMMAND_PMS_DISCONNECT_ARRAY_ID,0,0,TX_PRI,TX_EXT,TX_RTR);
+            break;
+        case COMMAND_PMS_ENABLE_HORN_ID:
+            // Received a command to honk the horn
+            output_high(HORN_PIN);
+            for (i = 0 ; i < HORN_DURATION_MS ; i++)
+            {
+                delay_ms(1);
+            }
+            output_low(HORN_PIN);
             break;
         case CAN_BPS_TEMPERATURE1_ID:
         case CAN_BPS_TEMPERATURE2_ID:
