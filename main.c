@@ -54,6 +54,18 @@ int1 check_bps_temperature(int * data, int length)
     return 1;
 }
 
+void update_pms_data(void)
+{
+    g_pms_data_page[0] = 1;
+    g_pms_data_page[1] = 2;
+    g_pms_data_page[2] = 3;
+    g_pms_data_page[3] = 4;
+    g_pms_data_page[4] = 5;
+    g_pms_data_page[5] = 6;
+    g_pms_data_page[6] = 7;
+    g_pms_data_page[7] = 8;
+}
+
 // INT_TIMER2 programmed to trigger every 1ms with a 20MHz clock
 // This interrupt will send out telemetry data for the aux pack and the dcdc converter
 // This interrupt will also toggle the status LED
@@ -123,7 +135,7 @@ void idle_state(void)
         gb_can1_hit = false;
         g_state = DATA_RECEIVED;
     }
-    else if (gb_send == true)
+    else if (can_tbe() && (gb_send == true))
     {
         // Ready to send data
         g_state = DATA_SENDING;
@@ -137,6 +149,7 @@ void idle_state(void)
 
 void check_switches_state(void)
 {
+    g_state = IDLE;
 }
 
 void data_received_state(void)
@@ -176,11 +189,15 @@ void data_received_state(void)
 void data_sending_state(void)
 {
     // Sends a packet of telemetry data
-    gb_send = false;
+    update_pms_data();
+    gb_send = false; // Reset sending flag
     can_putd(CAN_PMS_DATA_ID,g_pms_data_page,CAN_PMS_DATA_LEN,TX_PRI,TX_EXT,TX_RTR);
+    
+    // Return to idle state
     g_state = IDLE;
 }
 
+// Main
 void main()
 {
     // Enable CAN receive interrupts
