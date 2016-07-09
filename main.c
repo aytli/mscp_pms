@@ -140,6 +140,8 @@ void data_received_state(void)
     switch(g_rx_id)
     {
         case COMMAND_PMS_DISCONNECT_ARRAY_ID:
+            // Received a command to disconnect the array
+            // Turn off the array and send a response
             ARRAY_OFF;
             can_putd(COMMAND_PMS_DISCONNECT_ARRAY_ID,0,0,TX_PRI,TX_EXT,TX_RTR);
             break;
@@ -163,6 +165,7 @@ void data_received_state(void)
             break;
     }
     
+    // Return to idle state
     g_state = IDLE;
 }
 
