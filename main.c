@@ -5,6 +5,7 @@
 #define SENDING_PERIOD_MS      200
 #define PRECHARGE_DURATION_MS 2000 // CANNOT PRECHARGE FOR MORE THAN 7 SECONDS
 #define HORN_DURATION_MS       500
+#define DEBOUNCE_PERIOD_MS     100
 
 #define BPS_TEMP_WARNING  60 // 60°C charge limit
 #define BPS_TEMP_CRITICAL 70 // 70°C discharge limit
@@ -170,37 +171,65 @@ void idle_state(void)
 
 void check_switches_state(void)
 {
-    int i;
+    int16 i;
     
     // Check the array switch
     if ((input_state(MPPT_SWITCH) == 1) && (gb_array_connected == false) && (gb_battery_temperature_safe == true))
     {
-        // If the switch was turned on and the battery temperature is safe, turn on the array
-        ARRAY_ON;
+        for (i = 0 ; i < DEBOUNCE_PERIOD_MS ; i++)
+        {
+            delay_ms(1);
+        }
+        if (input_state(MPPT_SWITCH) == 1)
+        {
+            // If the switch was turned on and the battery temperature is safe, turn on the array
+            ARRAY_ON;
+        }
     }
     else if ((input_state(MPPT_SWITCH) == 0) && (gb_array_connected == true))
     {
-        // If the switch was turned off, turn off the array
-        ARRAY_OFF;
+        for (i = 0 ; i < DEBOUNCE_PERIOD_MS ; i++)
+        {
+            delay_ms(1);
+        }
+        if (input_state(MPPT_SWITCH) == 0)
+        {
+            // If the switch was turned off, turn off the array
+            ARRAY_OFF;
+        }
     }
     
     // Check the motor switch
     if ((input_state(MOTOR_SWITCH) == 1) && (gb_motor_connected == false))
     {
-        // If the switch was turned on, precharge the motor and turn it on
-        output_high(PRECHARGE_PIN);
-        for (i = 0 ; i < PRECHARGE_DURATION_MS ; i++)
+        for (i = 0 ; i < DEBOUNCE_PERIOD_MS ; i++)
         {
             delay_ms(1);
         }
-        MOTOR_ON;
-        delay_ms(10);
-        output_low(PRECHARGE_PIN);
+        if (input_state(MOTOR_SWITCH) == 1)
+        {
+            // If the switch was turned on, precharge the motor and turn it on
+            output_high(PRECHARGE_PIN);
+            for (i = 0 ; i < PRECHARGE_DURATION_MS ; i++)
+            {
+                delay_ms(1);
+            }
+            MOTOR_ON;
+            delay_ms(10);
+            output_low(PRECHARGE_PIN);
+        }
     }
     else if ((input_state(MOTOR_SWITCH) == 0) && (gb_motor_connected == true))
     {
-        // If the switch was turned off, turn off the motor
-        MOTOR_OFF;
+        for (i = 0 ; i < DEBOUNCE_PERIOD_MS ; i++)
+        {
+            delay_ms(1);
+        }
+        if (input_state(MOTOR_SWITCH) == 0)
+        {
+            // If the switch was turned off, turn off the motor
+            MOTOR_OFF;
+        }
     }
     
     // Return to idle state
