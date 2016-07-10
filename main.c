@@ -16,9 +16,13 @@
 #define TX_EXT 0
 #define TX_RTR 0
 
-#define ARRAY_ON                \
-    gb_array_connected = true;  \
-    output_high(MPPT_PIN);
+// Only turn on the array if the bps did not trip
+#define ARRAY_ON                   \
+    if (gb_bps_trip == false)      \
+    {                              \
+        gb_array_connected = true; \
+        output_high(MPPT_PIN);     \
+    }
 
 #define ARRAY_OFF               \
     gb_array_connected = false; \
@@ -54,6 +58,7 @@ static int8        g_rx_data[8];
 static pms_state_t g_state;
 static int1        gb_motor_connected;
 static int1        gb_array_connected;
+static int1        gb_bps_trip;
 static int1        gb_battery_temperature_safe;
 static int8        g_pms_data_page[CAN_PMS_DATA_LEN];
 
@@ -61,6 +66,7 @@ void pms_init(void)
 {
     gb_motor_connected          = false;
     gb_array_connected          = false;
+    gb_bps_trip                 = false;
     gb_battery_temperature_safe = true;
 }
 
@@ -248,6 +254,7 @@ void data_received_state(void)
             // Turn off the array and send a response
             ARRAY_OFF;
             can_putd(COMMAND_PMS_DISCONNECT_ARRAY_ID,0,0,TX_PRI,TX_EXT,TX_RTR);
+            gb_bps_trip = true; // The array disconnect command is interpreted as a BPS trip
             break;
         case COMMAND_PMS_ENABLE_HORN_ID:
             // Received a command to honk the horn
