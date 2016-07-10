@@ -16,13 +16,9 @@
 #define TX_EXT 0
 #define TX_RTR 0
 
-// Only turn on the array if the bps did not trip
-#define ARRAY_ON                   \
-    if (gb_bps_trip == false)      \
-    {                              \
-        gb_array_connected = true; \
-        output_high(MPPT_PIN);     \
-    }
+#define ARRAY_ON                \
+    gb_array_connected = true;  \
+    output_high(MPPT_PIN);
 
 #define ARRAY_OFF               \
     gb_array_connected = false; \
@@ -58,7 +54,6 @@ static int8        g_rx_data[8];
 static pms_state_t g_state;
 static int1        gb_motor_connected;
 static int1        gb_array_connected;
-static int1        gb_bps_trip;
 static int1        gb_battery_temperature_safe;
 static int8        g_pms_data_page[CAN_PMS_DATA_LEN];
 
@@ -66,7 +61,6 @@ void pms_init(void)
 {
     gb_motor_connected          = false;
     gb_array_connected          = false;
-    gb_bps_trip                 = false;
     gb_battery_temperature_safe = true;
 }
 
@@ -254,7 +248,8 @@ void data_received_state(void)
             // Turn off the array and send a response
             ARRAY_OFF;
             can_putd(COMMAND_PMS_DISCONNECT_ARRAY_ID,0,0,TX_PRI,TX_EXT,TX_RTR);
-            gb_bps_trip = true; // The array disconnect command is interpreted as a BPS trip
+            g_state = BPS_TRIP;
+            return; // Break out of this state early, fall into the bps trip state
             break;
         case COMMAND_PMS_ENABLE_HORN_ID:
             // Received a command to honk the horn
@@ -297,6 +292,13 @@ void data_sending_state(void)
     g_state = IDLE;
 }
 
+void bps_trip_state(void)
+{
+    // The PMS will assume a bps trip when it receives a command over CAN bus to disconnect the array
+    // The state machine will never exit this state if it falls in, the PMS will need to be reset
+    g_state = BPS_TRIP;
+}
+
 // Main
 void main()
 {
@@ -332,6 +334,9 @@ void main()
                 break;
             case DATA_SENDING:
                 data_sending_state();
+                break;
+            case BPS_TRIP:
+                bps_trip_state();
                 break;
             default:
                 break;

@@ -41,5 +41,6 @@ typedef enum
     CHECK_SWITCHES,
     DATA_RECEIVED,
     DATA_SENDING,
+    BPS_TRIP,
     N_STATES
 } pms_state_t;
