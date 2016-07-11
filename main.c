@@ -307,7 +307,7 @@ void data_sending_state(void)
 
 void bps_trip_state(void)
 {
-    // The PMS will assume a bps trip when it receives a command over CAN bus to disconnect the array
+    // The PMS will assume a bps trip when it receives a CAN command to disconnect the array
     // The state machine will never exit this state if it falls in, the PMS will need to be reset
     g_state = BPS_TRIP;
 }
