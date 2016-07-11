@@ -143,7 +143,6 @@ void update_pms_data(void)
     g_pms_data_page[4] = read_dcdc_temp();      // DC/DC converter temperature
     g_pms_data_page[5] = gb_array_connected;    // Motor state
     g_pms_data_page[6] = gb_motor_connected;    // Array state
-    g_pms_data_page[7] = 8; // Unused?
 }
 
 // Honks the horn for a predefined duration
