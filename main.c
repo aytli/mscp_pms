@@ -20,6 +20,9 @@
 #define BPS_TEMP_WARNING       60 // 60°C charge limit
 #define BPS_TEMP_CRITICAL      70 // 70°C discharge limit
 
+// Miscellaneous defines
+#define N_AUX_CELLS 4
+
 // CAN bus defines
 #define TX_PRI 3
 #define TX_EXT 0
@@ -64,6 +67,7 @@ static pms_state_t g_state;
 static int1        gb_motor_connected;
 static int1        gb_array_connected;
 static int1        gb_battery_temperature_safe;
+static int8        g_aux_pack_voltage[N_AUX_CELLS];
 static int8        g_pms_data_page[CAN_PMS_DATA_LEN];
 
 void pms_init(void)
@@ -71,6 +75,11 @@ void pms_init(void)
     gb_motor_connected          = false;
     gb_array_connected          = false;
     gb_battery_temperature_safe = true;
+    
+    // Set up the ADC channels
+    setup_adc(ADC_CLOCK_INTERNAL);
+    setup_adc_ports(AUX1_ANALOG_PIN | AUX2_ANALOG_PIN | AUX3_ANALOG_PIN | AUX4_ANALOG_PIN |
+                    DCDC_TEMP_ANALOG_PIN);
 }
 
 // Accepts a packet of BPS temperature data and the length of the packet
@@ -92,15 +101,48 @@ int1 check_bps_temperature(int * data, int length)
     return 1;
 }
 
+void read_aux_voltages(void)
+{
+    // Cell 1
+    set_adc_channel(AUX1_ADC_CHANNEL);
+    g_aux_pack_voltage[0] = read_adc();
+    delay_us(10);
+    
+    // Cell 2
+    set_adc_channel(AUX2_ADC_CHANNEL);
+    g_aux_pack_voltage[1] = read_adc();
+    delay_us(10);
+    
+    // Cell 3
+    set_adc_channel(AUX3_ADC_CHANNEL);
+    g_aux_pack_voltage[2] = read_adc();
+    delay_us(10);
+    
+    // Cell 4
+    set_adc_channel(AUX4_ADC_CHANNEL);
+    g_aux_pack_voltage[3] = read_adc();
+    delay_us(10);
+}
+
+int8 read_dcdc_temp(void)
+{
+    int8 temp;
+    set_adc_channel(DCDC_TEMP_ADC_CHANNEL);
+    temp = read_adc();
+    delay_us(10);
+    return temp;
+}
+
 void update_pms_data(void)
 {
-    g_pms_data_page[0] = 1; // Aux cell 1 voltage
-    g_pms_data_page[1] = 2; // Aux cell 2 voltage
-    g_pms_data_page[2] = 3; // Aux cell 3 voltage
-    g_pms_data_page[3] = 4; // Aux cell 4 voltage
-    g_pms_data_page[4] = 5; // DC/DC converter temperature
-    g_pms_data_page[5] = gb_array_connected; // Motor state
-    g_pms_data_page[6] = gb_motor_connected; // Array state
+    read_aux_voltages(); // Read the aux voltages
+    g_pms_data_page[0] = g_aux_pack_voltage[0]; // Aux cell 1 voltage
+    g_pms_data_page[1] = g_aux_pack_voltage[1]; // Aux cell 2 voltage
+    g_pms_data_page[2] = g_aux_pack_voltage[2]; // Aux cell 3 voltage
+    g_pms_data_page[3] = g_aux_pack_voltage[3]; // Aux cell 4 voltage
+    g_pms_data_page[4] = read_dcdc_temp();      // DC/DC converter temperature
+    g_pms_data_page[5] = gb_array_connected;    // Motor state
+    g_pms_data_page[6] = gb_motor_connected;    // Array state
     g_pms_data_page[7] = 8; // Unused?
 }
 
@@ -298,8 +340,8 @@ void data_sending_state(void)
 {
     // Sends a packet of telemetry data
     update_pms_data();
-    gb_send = false; // Reset sending flag
     can_putd(CAN_PMS_DATA_ID,g_pms_data_page,CAN_PMS_DATA_LEN,TX_PRI,TX_EXT,TX_RTR);
+    gb_send = false; // Reset sending flag
     
     // Return to idle state
     g_state = IDLE;

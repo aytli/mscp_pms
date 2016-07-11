@@ -1,5 +1,5 @@
 #include <18F26K80.h>
-#device adc=16
+#device adc=8
 
 #FUSES NOWDT                    //No Watch Dog Timer
 #FUSES SOSC_DIG                 //Digital mode, I/O port functionality of RC0 and RC1
@@ -33,6 +33,20 @@
 #define AUX3_PIN      PIN_A2
 #define AUX4_PIN      PIN_A3
 #define DCDC_TEMP_PIN PIN_B0
+
+// Aux pack ADC channels and pins
+#define AUX1_ADC_CHANNEL          0
+#define AUX2_ADC_CHANNEL          1
+#define AUX3_ADC_CHANNEL          2
+#define AUX4_ADC_CHANNEL          3
+#define AUX1_ANALOG_PIN        sAN0
+#define AUX2_ANALOG_PIN        sAN1
+#define AUX3_ANALOG_PIN        sAN2
+#define AUX4_ANALOG_PIN        sAN3
+
+// DC/DC temperature ADC channel and pin
+#define DCDC_TEMP_ADC_CHANNEL    10
+#define DCDC_TEMP_ANALOG_PIN  sAN10
 
 // State machine states
 typedef enum
