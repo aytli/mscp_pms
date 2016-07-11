@@ -1,11 +1,20 @@
+// Power management system code
+// Author: Andy Li (liy92@mcmaster.ca)
+// Copyright 2016, McMaster Solar Car Project
+// Controls the motor and MPPT relays, precharge, and the horn, reads the
+// voltage of the aux pack and the temperature of the DC/DC converter and sends
+// it over CAN bus
+
+// Includes
 #include "main.h"
 #include "can_telem.h"
 #include "can18F4580_mscp.c"
 
-#define SENDING_PERIOD_MS      200
+// Timing periods
+#define SENDING_PERIOD_MS      200 // Telemetry data is sent over CAN bus at this period
 #define PRECHARGE_DURATION_MS 2000 // CANNOT PRECHARGE FOR MORE THAN 7 SECONDS
-#define HORN_DURATION_MS       500
-#define DEBOUNCE_PERIOD_MS     100
+#define HORN_DURATION_MS       500 // Duration of the horn honk
+#define DEBOUNCE_PERIOD_MS     100 // Hardware switch debounce period
 
 // BMS temperature limits
 #define BPS_TEMP_WARNING       60 // 60°C charge limit
@@ -74,9 +83,12 @@ int1 check_bps_temperature(int * data, int length)
     {
         if (data[i] >= BPS_TEMP_WARNING)
         {
+            // Temperature is above the warning threshold, return false
             return 0;
         }
     }
+    
+    // The temperatures are below the warning threshold, return true
     return 1;
 }
 
@@ -86,12 +98,13 @@ void update_pms_data(void)
     g_pms_data_page[1] = 2; // Aux cell 2 voltage
     g_pms_data_page[2] = 3; // Aux cell 3 voltage
     g_pms_data_page[3] = 4; // Aux cell 4 voltage
-    g_pms_data_page[4] = 5; // DC/Dc converter temperature
+    g_pms_data_page[4] = 5; // DC/DC converter temperature
     g_pms_data_page[5] = gb_array_connected; // Motor state
     g_pms_data_page[6] = gb_motor_connected; // Array state
     g_pms_data_page[7] = 8; // Unused?
 }
 
+// Honks the horn for a predefined duration
 void honk(void)
 {
     int16 i;
