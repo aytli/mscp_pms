@@ -22,7 +22,7 @@
 // OUTPUTS
 #define STATUS_LED    PIN_A5
 #define HORN_PIN      PIN_B3
-#define AUX_PIN       PIN_C0
+#define AUX_READ_PIN  PIN_C0
 #define PRECHARGE_PIN PIN_C1
 #define MOTOR_PIN     PIN_C2
 #define MPPT_PIN      PIN_C3

@@ -103,6 +103,10 @@ int1 check_bps_temperature(int * data, int length)
 
 void read_aux_voltages(void)
 {
+    // Connect the aux pack cell terminals to the ADCs
+    output_high(AUX_READ_PIN);
+    delay_us(10);
+    
     // Cell 1
     set_adc_channel(AUX1_ADC_CHANNEL);
     g_aux_pack_voltage[0] = read_adc();
@@ -122,6 +126,9 @@ void read_aux_voltages(void)
     set_adc_channel(AUX4_ADC_CHANNEL);
     g_aux_pack_voltage[3] = read_adc();
     delay_us(10);
+    
+    // Disconnect the aux pack to avoid draining current
+    output_low(AUX_READ_PIN);
 }
 
 int8 read_dcdc_temp(void)
