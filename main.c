@@ -14,7 +14,7 @@
 #define SENDING_PERIOD_MS      200 // Telemetry data is sent over CAN bus at this period
 #define PRECHARGE_DURATION_MS 2000 // CANNOT PRECHARGE FOR MORE THAN 7 SECONDS
 #define HORN_DURATION_MS       500 // Duration of the horn honk
-#define DEBOUNCE_PERIOD_MS     100 // Hardware switch debounce period
+#define DEBOUNCE_PERIOD_MS      10 // Hardware switch debounce period
 
 // BMS temperature limits
 #define BPS_TEMP_WARNING       60 // 60°C charge limit
