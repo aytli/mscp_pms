@@ -46,6 +46,7 @@
 
 // Debounces a hardware pin
 #define DEBOUNCE                               \
+    int16 i;                                   \
     for (i = 0 ; i < DEBOUNCE_PERIOD_MS ; i++) \
     {                                          \
         delay_ms(1);                           \
@@ -247,8 +248,6 @@ void idle_state(void)
 
 void check_switches_state(void)
 {
-    int16 i;
-    
     // Check the array switch
     if ((input_state(MPPT_SWITCH) == 1) && (gb_array_connected == false) && (gb_battery_temperature_safe == true))
     {
