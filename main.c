@@ -11,7 +11,7 @@
 #include "can18F4580_mscp.c"
 
 // Timing periods
-#define SENDING_PERIOD_MS      200 // Telemetry data is sent over CAN bus at this period
+#define SENDING_PERIOD_MS     1000 // Telemetry data is sent over CAN bus at this period
 #define PRECHARGE_DURATION_MS 2000 // CANNOT PRECHARGE FOR MORE THAN 7 SECONDS
 #define HORN_DURATION_MS       500 // Duration of the horn honk
 #define DEBOUNCE_PERIOD_MS      10 // Hardware switch debounce period
@@ -171,7 +171,7 @@ void honk(void)
 #int_timer2
 void isr_timer2(void)
 {
-    static int8 ms = 0;
+    static int16 ms = 0;
     if (ms >= SENDING_PERIOD_MS)
     {
         ms = 0;                    // Reset timer
