@@ -307,7 +307,7 @@ void data_received_state(void)
             // Received a command to disconnect the array
             // Turn off the array and send a response
             ARRAY_OFF;
-            can_putd(COMMAND_PMS_DISCONNECT_ARRAY_ID,0,0,TX_PRI,TX_EXT,TX_RTR);
+            can_putd(RESPONSE_PMS_DISCONNECT_ARRAY_ID,0,0,TX_PRI,TX_EXT,TX_RTR);
             g_state = BPS_TRIP;
             return; // Break out of this state early, fall into the bps trip state
             break;

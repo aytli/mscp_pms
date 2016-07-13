@@ -32,10 +32,11 @@ enum {CAN_ID_TABLE(EXPAND_AS_CAN_LEN_ENUM)};
 #define EXPAND_AS_MISC_ID_ENUM(a,b)  a##_ID  = b,
 
 // X macro table of miscellaneous CANbus packets
-//        Packet name                  ,    ID
-#define CAN_MISC_TABLE(ENTRY)                   \
-    ENTRY(COMMAND_PMS_DISCONNECT_ARRAY , 0x777) \
-    ENTRY(COMMAND_PMS_ENABLE_HORN      , 0x780)
+//        Packet name                   ,    ID
+#define CAN_MISC_TABLE(ENTRY)                    \
+    ENTRY(COMMAND_PMS_DISCONNECT_ARRAY  , 0x777) \
+    ENTRY(RESPONSE_PMS_DISCONNECT_ARRAY , 0x778) \
+    ENTRY(COMMAND_PMS_ENABLE_HORN       , 0x780)
 #define N_CAN_COMMAND 2
 
 enum {CAN_MISC_TABLE(EXPAND_AS_MISC_ID_ENUM)};
