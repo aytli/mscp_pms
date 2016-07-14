@@ -143,6 +143,11 @@ int8 read_dcdc_temp(void)
 
 void update_pms_data(void)
 {
+    // The PMS telemetry packet contains a bit which will toggle every time the
+    // packet is sent out. This bit serves as a CAN bus heartbeat signal, which
+    // will show up on Labview to indicate the status of the bus.
+    static int1 b_can_heartbeat = 0;
+    
     read_aux_voltages(); // Read the aux voltages
     g_pms_data_page[0] = g_aux_pack_voltage[0]; // Aux cell 1 voltage
     g_pms_data_page[1] = g_aux_pack_voltage[1]; // Aux cell 2 voltage
@@ -151,6 +156,9 @@ void update_pms_data(void)
     g_pms_data_page[4] = read_dcdc_temp();      // DC/DC converter temperature
     g_pms_data_page[5] = gb_array_connected;    // Motor state
     g_pms_data_page[6] = gb_motor_connected;    // Array state
+    g_pms_data_page[7] = b_can_heartbeat;       // CAN bus heartbeat
+    
+    b_can_heartbeat = !b_can_heartbeat;
 }
 
 // Honks the horn for a predefined duration
