@@ -143,9 +143,7 @@ int8 read_dcdc_temp(void)
 
 void update_pms_data(void)
 {
-    // The PMS telemetry packet contains a bit which will toggle every time the
-    // packet is sent out. This bit serves as a CAN bus heartbeat signal, which
-    // will show up on Labview to indicate the status of the bus.
+    // PMS CAN bus heartbeat signal
     static int1 b_can_heartbeat = 0;
     
     read_aux_voltages(); // Read the aux voltages
