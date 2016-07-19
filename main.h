@@ -18,6 +18,7 @@
 // SWITCHES
 #define MPPT_SWITCH   PIN_B4
 #define MOTOR_SWITCH  PIN_B5
+#define BRAKE_SWITCH  PIN_C4
 
 // OUTPUTS
 #define STATUS_LED    PIN_A5

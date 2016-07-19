@@ -67,6 +67,7 @@ static int8        g_rx_data[8];
 static pms_state_t g_state;
 static int1        gb_motor_connected;
 static int1        gb_array_connected;
+static int1        gb_brake_pressed;
 static int1        gb_battery_temperature_safe;
 static int8        g_aux_pack_voltage[N_AUX_CELLS];
 static int8        g_pms_data_page[CAN_PMS_DATA_LEN];
@@ -75,6 +76,7 @@ void pms_init(void)
 {
     gb_motor_connected          = false;
     gb_array_connected          = false;
+    gb_brake_pressed            = false;
     gb_battery_temperature_safe = true;
     
     // Set up the ADC channels
@@ -298,6 +300,28 @@ void check_switches_state(void)
         {
             // If the switch was turned off, turn off the motor
             MOTOR_OFF;
+        }
+    }
+    
+    // Check the brake lights
+    if ((input_state(BRAKE_SWITCH) == 1) && (gb_brake_pressed == false))
+    {
+        DEBOUNCE;
+        if (input_state(BRAKE_SWITCH) == 1)
+        {
+            // If the brake was pressed, signal the blinker to turn on the brake lights
+            can_putd(COMMAND_PMS_BRAKE_LIGHT_ID,0,0,TX_PRI,TX_EXT,TX_RTR);
+            gb_brake_pressed = true;
+        }
+    }
+    else if ((input_state(BRAKE_SWITCH) == 0) && (gb_brake_pressed == true))
+    {
+        DEBOUNCE;
+        if (input_state(BRAKE_SWITCH) == 0)
+        {
+            // If the brake was released, signal the blinker to turn off the brake lights
+            can_putd(COMMAND_PMS_BRAKE_LIGHT_ID,0,0,TX_PRI,TX_EXT,TX_RTR);
+            gb_brake_pressed = false;
         }
     }
     
