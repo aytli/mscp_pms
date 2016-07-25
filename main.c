@@ -17,8 +17,8 @@
 #define DEBOUNCE_PERIOD_MS      10 // Hardware switch debounce period
 
 // BMS temperature limits
-#define BPS_TEMP_WARNING       60 // 60°C charge limit
-#define BPS_TEMP_CRITICAL      70 // 70°C discharge limit
+#define BPS_TEMP_WARNING        58 // 60°C charge limit, PMS should disconnect the array before the warning threshold is reached
+#define BPS_TEMP_CRITICAL       70 // 70°C discharge limit
 
 // Miscellaneous defines
 #define N_AUX_CELLS 4
